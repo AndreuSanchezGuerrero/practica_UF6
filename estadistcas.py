@@ -5,6 +5,12 @@ import sys
 conexion = mysql.connector.connect(host='10.91.255.121', user='andreu',password='01011900', database='nba_uf6')
 cursor = conexion.cursor()
 
+crear_taula_seasons = """
+CREATE TABLE IF NOT EXISTS seasons (
+    year INT
+)
+"""
+
 crear_taula_player_stats = """
 CREATE TABLE IF NOT EXISTS playerstats (
     player_id INT,
@@ -73,7 +79,9 @@ CREATE TABLE IF NOT EXISTS playerstats (
     dd2_rank INT,
     td3_rank INT,
     wnba_fantasy_pts_rank INT,
-    available_flag INT
+    available_flag INT,
+    CONSTRAINT PK_player_id 	PRIMARY KEY (player_id),
+    CONSTRAINT FK_season_id FOREIGN KEY REFERENCES temporades(temporada_id)
 );
 """
 
