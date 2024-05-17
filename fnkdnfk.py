@@ -19,4 +19,3 @@ while i!=24:
     i+=1
     x+=1
 
-print(setAnys)
