@@ -3,17 +3,17 @@ import mysql.connector
 import sys
 from time import sleep
 
-conexion = mysql.connector.connect(host='192.168.50.35', user='andreu',password='01011900', database='nba_uf6')
+conexion = mysql.connector.connect(host='192.168.1.122', user='andreu', password='01011900', database='nba_uf6')
 cursor = conexion.cursor()
 
-
-#Creates
-#---------------------------------------------------------------------------------------
+# Creates
+# ---------------------------------------------------------------------------------------
 def create_seasons():
+    cursor.execute("DROP TABLE IF EXISTS seasons")
     crear_taula_seasons = """
     CREATE TABLE IF NOT EXISTS seasons (
-        year CHAR(7),
-        CONSTRAINT PK_year 	PRIMARY KEY (year)
+        year CHAR(10),
+        CONSTRAINT PK_year PRIMARY KEY (year)
     );   
     """
     cursor.execute(crear_taula_seasons)
@@ -24,37 +24,38 @@ def create_teams():
         team_id INT,
         team_name VARCHAR(255),
         team_abbreviation CHAR(3),
-        CONSTRAINT PK_team_id 	PRIMARY KEY (team_id)
+        CONSTRAINT PK_team_id PRIMARY KEY (team_id)
     );   
     """
     cursor.execute(crear_taula_teams)
 
 def create_players():
     crear_taula_players = """
-        CREATE TABLE Player (
+        CREATE TABLE IF NOT EXISTS players (
             player_id INT NOT NULL,
             player_name VARCHAR(100) NOT NULL,
             player_nickname VARCHAR(100),
             team_id INT,
-            team_abbreviation CHAR(3),
-            seasonYear YEAR,
-            CONSTRAINT PK_player_id 	PRIMARY KEY (player_id),
-            CONSTRAINT FK_team_id FOREIGN KEY (team_id) REFERENCES Team(team_id),
-            CONSTRAINT FK_seasonYear FOREIGN KEY (seasonYear) REFERENCES Season(seasonYear)
+            team_name VARCHAR(100),
+            seasonYear CHAR(10),
+            CONSTRAINT PK_player PRIMARY KEY (player_id, team_id, seasonYear),
+            CONSTRAINT FK_team_id FOREIGN KEY (team_id) REFERENCES teams(team_id),
+            CONSTRAINT FK_seasonYear FOREIGN KEY (seasonYear) REFERENCES seasons(year)
         );  
             """
     cursor.execute(crear_taula_players)
 
 def create_games():
-    crear_taula_seasons = """
-    CREATE TABLE IF NOT EXISTS seasons (
-        year CHAR(7),
-        CONSTRAINT PK_year 	PRIMARY KEY (year)
+    crear_taula_games = """
+    CREATE TABLE IF NOT EXISTS games (
+        game_id VARCHAR(255),
+        season_year CHAR(10),
+        CONSTRAINT PK_game_id PRIMARY KEY (game_id)
     );   
     """
-    cursor.execute(crear_taula_seasons)
+    cursor.execute(crear_taula_games)
 
-def create_players_stats():
+def create_player_stats():
     crear_taula_player_stats = """
         CREATE TABLE IF NOT EXISTS playerstats (
             player_id INT,
@@ -124,15 +125,16 @@ def create_players_stats():
             td3_rank INT,
             wnba_fantasy_pts_rank INT,
             available_flag INT,
-            CONSTRAINT PK_player_id 	PRIMARY KEY (player_id),
-            CONSTRAINT FK_season_id FOREIGN KEY REFERENCES temporades(temporada_id)
+            CONSTRAINT PK_player_id PRIMARY KEY (player_id),
+            CONSTRAINT FK_team_id FOREIGN KEY (team_id) REFERENCES teams(team_id),
+            CONSTRAINT FK_season_year FOREIGN KEY (season_year) REFERENCES seasons(year)
         );
         """
     cursor.execute(crear_taula_player_stats)
-#---------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------
 
-#Insert
-#---------------------------------------------------------------------------------------
+# Insert
+# ---------------------------------------------------------------------------------------
 def insert_player_stats(seasons):
     for season in seasons: 
         diccionario = playergamelogs.PlayerGameLogs(season_nullable=season).player_game_logs.get_dict()
@@ -142,49 +144,52 @@ def insert_player_stats(seasons):
 
 def insert_seasons(seasons):
     for season in seasons: 
-        insert_season = "INSERT INTO teams (year) VALUES(%s)"
+        insert_season = "INSERT INTO seasons (year) VALUES(%s)"
         cursor.execute(insert_season, [season])
         conexion.commit()
 
 def insert_teams(teams):
-
     for team in teams:
         dada = team.split(",")
         team_id = dada[0]
         team_name = dada[1]
         team_abbreviation = dada[2]
 
-        insert ="INSERT INTO teams (team_id, team_name, team_abbreviation) VALUES(%s, %s, %s)"
+        insert = "INSERT INTO teams (team_id, team_name, team_abbreviation) VALUES(%s, %s, %s)"
         cursor.execute(insert, [team_id, team_name, team_abbreviation])
         conexion.commit()    
 
-def insert_teams(players):
-
+def insert_players(players):
     for player in players:
         dada = player.split(",")
-        playerID= dada[0]
+        playerID = dada[0]
         playerName = dada[1]
         playerNickname = dada[2]
         team_id = dada[3]
         team_name = dada[4]
-        team_abbreviation = dada[5]
+        seasonYear = dada[5]
 
-        insert ="INSERT INTO teams (player_id, player_name, player_nickname, team_id, team_name, team_abbreviation) VALUES(%s, %s, %s, %s, %s, %s)"
-        cursor.execute(insert, [playerID, playerName, playerNickname, team_id, team_name, team_abbreviation])
+        insert = "INSERT INTO players (player_id, player_name, player_nickname, team_id, team_name, seasonYear) VALUES(%s, %s, %s, %s, %s, %s)"
+        cursor.execute(insert, [playerID, playerName, playerNickname, team_id, team_name, seasonYear])
         conexion.commit()   
 
-#----------------------------------------------------------------------------------------
-i=16
-x=17
+# ----------------------------------------------------------------------------------------
+i = 16
+x = 17
 
 create_seasons()
 create_teams()
+create_players()
 setAnys = set()
 setTeam = set()
 setplayer = set()
-while i!=18:
-    diccionario = diccionario = playergamelogs.PlayerGameLogs(season_nullable=f'20{i}-{x}').player_game_logs.get_dict()
+while i != 18:
+    diccionario = playergamelogs.PlayerGameLogs(season_nullable=f'20{i}-{x}').player_game_logs.get_dict()
     for dada in diccionario["data"]:
+        
+        # Dades seasons
+        seasonYear = dada[0]
+        
         # Dades player
         playerID = dada[1]
         playerName = dada[2]
@@ -195,44 +200,25 @@ while i!=18:
         teamName = dada[6]
         teamAbbreviation = dada[5]
 
-        # Dades seasons
-        seasonYear = dada[0]
-        playerComplet = (f"{playerID},{playerName},{playerNickname},{teamID},{teamAbbreviation},{seasonYear}")
+
+        #Dades games
+        gameID = dada[7]
+
+        playerComplet = (f"{playerID},{playerName},{playerNickname},{teamID},{teamName},{seasonYear}")
         teamComplet = (f"{teamID},{teamName},{teamAbbreviation}")
         setplayer.add(playerComplet)
         setTeam.add(teamComplet)
         setAnys.add(seasonYear)
         print((dada[0]))
-        sleep(0.0001)
-    i+=1
-    x+=1
+        sleep(0.00001)
+    i += 1
+    x += 1
 
 seasons = list(setAnys)
-team = list(setTeam)
+teams = list(setTeam)
+players = list(setplayer)
 
-insert_teams(team)
-#----------------------------------------------------------------------------------------
-
-
-
-#print(seasons)
-
-#create_seasons()
-#insert_seasons(seasons)
-
-
-
-
-
-
-
-# diccionario = playergamelogs.PlayerGameLogs(season_nullable='2019-20').player_game_logs.get_dict()
-
-# for i in diccionario["headers"]:
-#     print(i)
-
-# for i in diccionario["data"]:
-#     print(i[0])
-
-# print(diccionario["data"][0])
-
+insert_seasons(seasons)
+insert_teams(teams)
+insert_players(players)
+# ----------------------------------------------------------------------------------------
