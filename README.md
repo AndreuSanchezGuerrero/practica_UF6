@@ -8,18 +8,31 @@ Aquest projecte connecta a una base de dades MySQL, crea diverses taules necess�
 
 #### `is_valid_ip(ip)`
 
-- **Descripció**: Valida si l'string introduida és una adreça IP vàlida. 
-- **Retorna**: `True` si l'adreça IP és vàlida, `False` en cas contrari.
+- **Descripció**: 
+    - Valida si l'string introduida és una adreça IP vàlida. 
+- **Pas per pas**: 
+    - Verifica que la cadena té quatre grups de números (d'1 a 3 dígits) separats per punts.
+    - La funció divideix la cadena en parts separades per punts i comprova que cada part està entre 0 i 255.
+    - Si totes les parts compleixen amb els requisits, la funció Pas per pas True; en cas contrari, False.
+
+<br>
 
 #### `connect_to_db(host, user, password, database=None)`
 
-- **Descripció**: Intenta connectar-se a una base de dades MySQL amb les credencials proporcionades.
+- **Descripció**: 
+    - Intenta connectar-se a una base de dades MySQL amb les credencials proporcionades.
 - **Paràmetres**:
   - `host` (str) - L'adreça IP del servidor de la base de dades.
   - `user` (str) - El nom d'usuari.
   - `password` (str) - La contrasenya.
-  - `database` (str, opcional) - El nom de la base de dades a la qual connectar-se.
-- **Retorna**: L'objecte de connexió si té èxit, `None` en cas contrari.
+  - `database` (str) - El nom de la base de dades a la qual connectar-se.
+- **Pas per pas**:
+    - La funció intenta connectar-se a la base de dades amb les credencials proporcionades.
+    - Si la connexió és exitosa, retorna l'objecte de connexió.
+    - Si hi ha un error, verifica el tipus d'error i imprimeix un missatge adequat (usuari o contrasenya incorrectes o base de dades no existeix). 
+    - Retorna `None` en cas de no tenir exit.
+
+<br>
 
 #### `check_user_exists(connection, user)`
 
@@ -27,7 +40,12 @@ Aquest projecte connecta a una base de dades MySQL, crea diverses taules necess�
 - **Paràmetres**:
   - `connection` (mysql.connector.connection) - L'objecte de connexió a la base de dades.
   - `user` (str) - El nom de l'usuari a comprovar.
-- **Retorna**: `True` si l'usuari existeix, `False` en cas contrari.
+- **Pas per pas**: 
+    - La funció crea un cursor per executar consultes a la base de dades.
+    - Executa una consulta SQL per comptar quants usuaris tenen el nom proporcionat.
+    - Si el comptador és major que 0, retorna True, indicant que l'usuari existeix.
+
+<br>
 
 #### `check_database_exists(connection, database)`
 
@@ -35,7 +53,10 @@ Aquest projecte connecta a una base de dades MySQL, crea diverses taules necess�
 - **Paràmetres**:
   - `connection` (mysql.connector.connection) - L'objecte de connexió a la base de dades.
   - `database` (str) - El nom de la base de dades a comprovar.
-- **Retorna**: `True` si la base de dades existeix, `False` en cas contrari.
+- **Pas per pas**: 
+    - La funció crea un cursor per executar consultes a la base de dades.
+    - Executa una consulta SQL per mostrar bases de dades que coincideixin amb el nom proporcionat.
+    - Si es troba algun resultat, retorna True, indicant que la base de dades existeix.
 
 ### Funció Principal
 

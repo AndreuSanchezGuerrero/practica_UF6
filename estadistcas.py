@@ -4,6 +4,9 @@ import mysql.connector
 from mysql.connector import errorcode
 from time import sleep
 
+# 
+# Valida si la IP introduida és vàlida. 
+# 
 def is_valid_ip(ip):
     pattern = re.compile("^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$")
     if pattern.match(ip):
@@ -14,10 +17,15 @@ def is_valid_ip(ip):
         return True
     return False
 
+
+#
+# Connectar-se a una base de dades MySQL amb les credencials proporcionades. En cas de que no funcioni, retornem una excepció.
+#
 def connect_to_db(host, user, password, database=None):
     try:
         connection = mysql.connector.connect(host=host, user=user, password=password, database=database)
         return connection
+    
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
             print("Error: Usuari o contrasenya incorrectes.")
@@ -27,6 +35,10 @@ def connect_to_db(host, user, password, database=None):
             print(err)
         return None
 
+
+#
+# Comprova que l'usuari existeix
+#
 def check_user_exists(connection, user):
     cursor = connection.cursor()
     query = "SELECT COUNT(*) FROM mysql.user WHERE user = %s"
@@ -34,6 +46,9 @@ def check_user_exists(connection, user):
     result = cursor.fetchone()
     return result[0] > 0
 
+#
+# Comprova si una base de dades existeix al servidor MySQL.
+#
 def check_database_exists(connection, database):
     cursor = connection.cursor()
     query = "SHOW DATABASES LIKE %s"
@@ -50,12 +65,12 @@ def main():
         if is_valid_ip(host):
             break
         else:
-            print("Error: IP no vàlida. Si us plau, introdueix una IP correcta.")
+            print("\nError: IP no vàlida. Si us plau, introdueix una IP correcta.")
 
     # Demanar el nom d'usuari i validar
     while True:
-        user = input("Introdueix el nom d'usuari: ")
-        password = input("Introdueix la contrasenya: ")
+        user = input("\nIntrodueix el nom d'usuari: ")
+        password = input("\nIntrodueix la contrasenya: ")
 
         # Intentar connectar a la base de dades per verificar usuari i contrasenya
         connection = connect_to_db(host, user, password)
@@ -63,22 +78,22 @@ def main():
             if check_user_exists(connection, user):
                 break
             else:
-                print("Error: L'usuari no existeix.")
+                print("\nError: L'usuari no existeix.")
         else:
-            print("Error: Usuari o contrasenya incorrectes.")
+            print("\nError: Usuari o contrasenya incorrectes.")
 
     # Demanar el nom de la base de dades i validar
     while True:
-        database = input("Introdueix el nom de la base de dades: ")
+        database = input("\nIntrodueix el nom de la base de dades: ")
         if check_database_exists(connection, database):
             break
         else:
-            print("Error: La base de dades no existeix.")
+            print("\nError: La base de dades no existeix.")
 
     # Connexió final a la base de dades específica
     connection = connect_to_db(host, user, password, database)
     if connection:
-        print("Connexió exitosa a la base de dades.")
+        print("\nConnexió exitosa a la base de dades.")
         sleep(1)
 
     # La resta del codi de processament de dades
