@@ -58,6 +58,8 @@ Aquest projecte connecta a una base de dades MySQL, crea diverses taules necess�
     - Executa una consulta SQL per mostrar bases de dades que coincideixin amb el nom proporcionat.
     - Si es troba algun resultat, retorna True, indicant que la base de dades existeix.
 
+<br><br>
+
 ### Funció Principal
 
 #### `main()`
@@ -68,6 +70,8 @@ Aquest projecte connecta a una base de dades MySQL, crea diverses taules necess�
   2. Demana el nom d'usuari i la contrasenya, i comprova la seva existència.
   3. Demana el nom de la base de dades i comprova la seva existència.
   4. Es connecta a la base de dades específica i procedeix al processament de les dades.
+
+<br><br>
 
 ### Funció de Processament de Dades
 
@@ -87,11 +91,13 @@ Aquest projecte connecta a una base de dades MySQL, crea diverses taules necess�
   - `insert_players(players)`: Insereix els jugadors a la taula `players`.
   - `insert_games(games)`: Insereix els partits a la taula `games`.
 
+<br><br>
+
 ### Funcions de Creació de Taules
 
 Cada funció de creació de taules segueix el mateix format:
 
-- **Descripció**: Crea una taula específica si no existeix.
+- **Descripció**: Crea una taula específica.
 - **Flux de treball**:
   1. Imprimeix un missatge indicant que està creant la taula.
   2. Fa una pausa amb `sleep(1)`.
@@ -109,22 +115,6 @@ Cada funció d'inserció de dades segueix el mateix format:
   2. Per cada registre:
      - Insereix el registre a la taula.
      - Imprimeix un missatge indicant el progrés de la inserció.
-     - Fa una pausa amb `sleep(0.1)`.
-  3. Imprimeix un missatge indicant que totes les dades han estat inserides.
-  4. Fa una pausa amb `sleep(1)`.
-
-### Funció de Consulta
-
-#### `get_team_points_per_game()`
-
-- **Descripció**: Executa una consulta per sumar els punts dels jugadors per equip i partit, i imprimeix els resultats.
-- **Flux de treball**:
-  1. Executa la consulta SQL per sumar els punts per equip i partit.
-  2. Recupera i imprimeix els resultats en el format `equip_local punts - equip_visitant punts`.
-
-## Execució
-
-Per executar el projecte, simplement cal executar el fitxer principal amb Python:
-
-```bash
-python main.py
+  3. Fa una pausa amb `sleep(1)`.
+  4. Imprimeix un missatge indicant que totes les dades han estat inserides.
+  5. Fa una pausa amb `sleep(1)`.

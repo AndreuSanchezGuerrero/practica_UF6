@@ -57,11 +57,19 @@ def check_database_exists(connection, database):
     return result is not None
 
 
+
+#### PROGRAMA PRINCIPAL ####
+
 def main():
     
+    print("""Benvingut a l'aplicació per extreure dades de l'API de l'NBA 
+i emmagatzemar dades a la teva base de dades propia.""")
+    print('-'*60)
+
+    print("\nOn vols emmagatzemar les dades?")    
     # Demanar la IP del host i validar
     while True:
-        host = input("Introdueix la IP del host on està la base de dades: ")
+        host = input("\tIntrodueix la IP del host on està la base de dades: ")
         if is_valid_ip(host):
             break
         else:
@@ -69,8 +77,8 @@ def main():
 
     # Demanar el nom d'usuari i validar
     while True:
-        user = input("\nIntrodueix el nom d'usuari: ")
-        password = input("\nIntrodueix la contrasenya: ")
+        user = input("\tIntrodueix el nom d'usuari: ")
+        password = input("\tIntrodueix la contrasenya: ")
 
         # Intentar connectar a la base de dades per verificar usuari i contrasenya
         connection = connect_to_db(host, user, password)
@@ -78,22 +86,23 @@ def main():
             if check_user_exists(connection, user):
                 break
             else:
-                print("\nError: L'usuari no existeix.")
+                print("Error: L'usuari no existeix.")
         else:
-            print("\nError: Usuari o contrasenya incorrectes.")
+            print("Error: Usuari o contrasenya incorrectes.")
 
     # Demanar el nom de la base de dades i validar
     while True:
-        database = input("\nIntrodueix el nom de la base de dades: ")
+        print("\nDades inserides correctament.\n")
+        database = input("\tIntrodueix el nom de la base de dades: ")
         if check_database_exists(connection, database):
             break
         else:
-            print("\nError: La base de dades no existeix.")
+            print("Error: La base de dades no existeix.")
 
     # Connexió final a la base de dades específica
     connection = connect_to_db(host, user, password, database)
     if connection:
-        print("\nConnexió exitosa a la base de dades.")
+        print("\nProcés de connexió a la base de dades finalitzat correctament.")
         sleep(1)
 
     # La resta del codi de processament de dades
@@ -107,7 +116,6 @@ def process_data(connection):
     def create_seasons():
         print("Creant taula seasons")
         sleep(1)
-        cursor.execute("DROP TABLE IF EXISTS seasons")
         crear_taula_seasons = """
         CREATE TABLE IF NOT EXISTS seasons (
             year CHAR(10),
@@ -115,13 +123,12 @@ def process_data(connection):
         );   
         """
         cursor.execute(crear_taula_seasons)
-        print("Taula seasons creada")
+        print("\nTaula seasons creada")
         sleep(1)
 
     def create_teams():
-        print("Creant taula teams")
+        print("\nCreant taula teams")
         sleep(1)
-        cursor.execute("DROP TABLE IF NOT EXISTS teams")
         crear_taula_teams = """
         CREATE TABLE IF NOT EXISTS teams (
             team_id INT,
@@ -135,9 +142,9 @@ def process_data(connection):
         sleep(1)
 
     def create_players():
-        print("Creant taula players")
+        print("\nCreant taula players")
         sleep(1)
-        cursor.execute("DROP TABLE IF NOT EXISTS players")
+
         crear_taula_players = """
             CREATE TABLE IF NOT EXISTS players (
                 player_id INT NOT NULL,
@@ -152,13 +159,12 @@ def process_data(connection):
             );  
         """
         cursor.execute(crear_taula_players)
-        print("Taula players creada")
+        print("\nTaula players creada")
         sleep(1)
 
     def create_games():
-        print("Creant taula games")
+        print("\nCreant taula games")
         sleep(1)
-        cursor.execute("DROP TABLE IF NOT EXISTS games")
         crear_taula_games = """
             CREATE TABLE IF NOT EXISTS games (
                 game_id VARCHAR(255) PRIMARY KEY,
@@ -170,13 +176,12 @@ def process_data(connection):
             );
         """
         cursor.execute(crear_taula_games)
-        print("Taula games creada")
+        print("\nTaula games creada")
         sleep(1)
 
     def create_player_stats():
-        print("Creant taula playerstats")
+        print("\nCreant taula playerstats")
         sleep(1)
-        cursor.execute("DROP TABLE IF NOT EXISTS playerstats")
         crear_taula_player_stats = """
             CREATE TABLE IF NOT EXISTS playerstats (
                 player_id INT,
@@ -189,15 +194,16 @@ def process_data(connection):
             );
         """
         cursor.execute(crear_taula_player_stats)
-        print("Taula playerstats creada")
+        print("\nTaula playerstats creada")
         sleep(1)
     # ---------------------------------------------------------------------------------------
 
     # Insercions
     # ---------------------------------------------------------------------------------------
     def insert_player_stats(stats):
+        i = 1
         total_stats = len(stats)
-        for i, stat in enumerate(stats):
+        for stat in stats:
             player_id = stat[0]
             game_id = stat[1]
             team_id = stat[2]
@@ -209,19 +215,21 @@ def process_data(connection):
             """
             cursor.execute(insert, [player_id, game_id, team_id, pts])
             connection.commit()
-            print(f"Insertant dades {i+1}/{total_stats} en playerstats")
-            sleep(0.1)
-        print("Dades inserides a la taula playerstats")
+            print(f"Insertant dades {i}/{total_stats} en playerstats")
+            i += 1
+        sleep(1)
+        print("\nDades inserides a la taula playerstats")
         sleep(1)
 
     def insert_seasons(seasons):
+        i=1
         total_seasons = len(seasons)
-        for i, season in enumerate(seasons): 
+        for season in seasons: 
             insert_season = "INSERT INTO seasons (year) VALUES(%s)"
             cursor.execute(insert_season, [season])
             connection.commit()
-            print(f"Insertant dades {i+1}/{total_seasons} en seasons")
-            sleep(0.1)
+            print(f"Insertant dades {i}/{total_seasons} en seasons")
+        sleep(1)
         print("Dades inserides a la taula seasons")
         sleep(1)
 
@@ -299,10 +307,17 @@ def process_data(connection):
     setPlayerStats = set()
     processed_game_ids = set()
 
-    while i <= 22:  # Ajustar per processar totes les temporades necessàries
-        diccionario = playergamelogs.PlayerGameLogs(season_nullable=f'20{i}-{x}').player_game_logs.get_dict()
+    while i <= 18:  # Ajustar per processar totes les temporades necessàries
+        
+        # Guardem les dades d'aquesta temporada
+        diccionari = playergamelogs.PlayerGameLogs(season_nullable=f'20{i}-{x}').player_game_logs.get_dict()
         print(f"Processant temporada 20{i}-{x}")  # Impressió de depuració
-        for dada in diccionario["data"]:
+        
+        for dada in diccionari["data"]:
+            
+            # Dades temporades
+            seasonYear = dada[0]
+            
             # Dades jugador
             playerID = dada[1]
             playerName = dada[2]
@@ -312,11 +327,12 @@ def process_data(connection):
             teamID = dada[4]
             teamName = dada[6]
             teamAbbreviation = dada[5]
-
-            # Dades temporades
-            seasonYear = dada[0]
-            playerComplet = (f"{playerID},{playerName},{playerNickname},{teamID},{teamAbbreviation},{seasonYear}")
+            
+            # Creem les seguents tuples per que si no donarà error de primary key i aixì guardem el conjunt únic
+            playerComplet = (f"{playerID},{playerName},{playerNickname},{teamID},{teamName},{seasonYear}")
             teamComplet = (f"{teamID},{teamName},{teamAbbreviation}")
+            
+            # Fem sets perque no siguin duplicats
             setplayer.add(playerComplet)
             setTeam.add(teamComplet)
             setAnys.add(seasonYear)
@@ -324,11 +340,16 @@ def process_data(connection):
             # Dades partits
             game_id = dada[7]
             matchup = dada[9].split(" ")
+            # Identificador de l'equip local (es considera l'equip actual del jugador com a local).
             home_team_id = teamID
-            away_team_id = None  # Inicialitzar away_team_id
+
+            # Inicialitza l'identificador de l'equip visitant com None per definir-lo més tard.
+            away_team_id = None  
 
             away_team_abbr = matchup[2]
             
+            # Itera sobre cada entrada en setTeam i busca una que contingui l'abreviació de l'equip visitant.
+            # Si es troba, es divideix la cadena team i s'obté l'identificador de l'equip visitant.
             for team in setTeam:
                 if away_team_abbr in team:
                     away_team_id = int(team.split(",")[0])
@@ -337,16 +358,16 @@ def process_data(connection):
             if away_team_id is not None:
                 gameComplet = (game_id, seasonYear, home_team_id, away_team_id)
                 setGames.add(gameComplet)
+                # Afegeix game_id al conjunt d'identificadors de partits processats per assegurar-se que no es processen duplicats.
                 processed_game_ids.add(game_id)
 
             # Estadístiques jugador
-            pts = dada[31]  # Suposant que aquesta és la columna de punts
+            pts = dada[31]
             playerStatsComplet = (playerID, game_id, teamID, pts)
             setPlayerStats.add(playerStatsComplet)
 
-            print(f"Processat game_id: {game_id}, player_id: {playerID}, pts: {pts}")  # Impressió de depuració
             sleep(0.00001)
-        i += 1
+        i += 1  
         x += 1
 
     # Verificar la quantitat de dades recopilades per a cada conjunt
