@@ -16,7 +16,7 @@ public class JugadorsDAO {
     public JugadorsDAO(Connection connection) {
         this.connection = connection;
     }
-    
+
 
     // Create
     public void addPlayer(Jugadors Jugador) throws SQLException {
@@ -53,11 +53,12 @@ public class JugadorsDAO {
     }
 
     // Llistar jugadors per nom d'equip
-    public List<Jugadors> getPlayersByTeamName(String teamName) throws SQLException {
+    public List<Jugadors> getPlayersByTeamNameAndSeason(String teamName, String seasonYear) throws SQLException {
         List<Jugadors> players = new ArrayList<>();
-        String query = "SELECT * FROM players WHERE team_name = ?";
+        String query = "SELECT * FROM players WHERE team_name = ? AND seasonYear = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, teamName);
+            stmt.setString(2, seasonYear);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 players.add(new Jugadors(
@@ -72,6 +73,7 @@ public class JugadorsDAO {
         }
         return players;
     }
+
 
 
 

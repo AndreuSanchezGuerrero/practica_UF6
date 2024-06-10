@@ -12,7 +12,6 @@ import Model.Jugadors.Jugadors;
 import Model.Equips.Equips;
 import Model.Partits.Partits;
 import Model.Seasons.Seasons;
-import Model.Seasons.SeasonsDAO;
 import Model.StatsJugadors.Stats;
 
 import java.io.BufferedReader;
@@ -61,30 +60,38 @@ public class Controlador {
                 // Cridem al mètode correspondent
                 switch (opcio) {
                     case 1:
+                        System.out.println("Seleccionat: Llistar tots els jugadors d'un equip");
                         llistarJugadorsEquips();
                         break;
                     case 2:
+                        System.out.println("Seleccionat: Calcular la mitjana de punts, rebots, assistències, etc. d'un jugador");
                         calcularMitjanaJugador();
                         break;
                     case 3:
+                        System.out.println("Seleccionat: Llistar tots els partits jugats per un equip amb el seu resultat");
                         llistarPartitsEquips();
                         break;
                     case 4:
+                        System.out.println("Seleccionat: Afegir un nou jugador a un equip");
                         inserirNouJugador();
                         break;
                     case 5:
+                        System.out.println("Seleccionat: Traspassar un jugador a un altre equip");
                         traspassarJugador();
                         break;
                     case 6:
-                        actualitzarDades();
+                        System.out.println("MANTENIMENT");
                         break;
                     case 7:
+                        System.out.println("Seleccionat: Modificar les estadístiques d'un jugador");
                         modificarEstadistiquesJugador();
                         break;
                     case 8:
+                        System.out.println("Seleccionat: Retirar (Eliminar) un jugador");
                         retirarJugador();
                         break;
                     case 9:
+                        System.out.println("Seleccionat: Canviar el nom de la franquícia d’un equip");
                         canviarNomFranquicia();
                         break;
                     case 0:
@@ -96,18 +103,31 @@ public class Controlador {
                 }
             } catch (IllegalArgumentException e) {
                 System.out.println("Error: " + e.getMessage());
+                scanner.next(); // Limpiar el buffer del scanner
             } catch (Exception e) {
                 System.out.println("Error: " + e.getMessage());
+                e.printStackTrace(); // Añadir rastreo de la pila para más detalles del error
             }
 
         } while (opcio != 0);
     }
 
-
     private void llistarJugadorsEquips() throws Exception {
         String nomEquip = Vista.demanarText("Introdueix el nom d'un equip per llistar els seus jugadors: ");
+        System.out.println("Nom de l'equip introduït: " + nomEquip);
         validarNomEquip(nomEquip);
-        Vista.llistarJugadorsEquip(jugadorsDAO.getPlayersByTeamName(nomEquip));
+
+        String temporada = Vista.demanarText("Introdueix l'any de la temporada (e.g., 2022): ");
+        System.out.println("Temporada introduïda: " + temporada);
+
+        List<Jugadors> jugadors = jugadorsDAO.getPlayersByTeamNameAndSeason(nomEquip, temporada);
+        System.out.println("Jugadors trobats: " + jugadors.size());
+
+        if (jugadors.isEmpty()) {
+            Vista.mostrarMissatge("No s'han trobat jugadors per a l'equip " + nomEquip + " en la temporada " + temporada);
+        } else {
+            Vista.llistarJugadorsEquip(jugadors);
+        }
     }
 
     private void calcularMitjanaJugador() throws Exception {
@@ -140,28 +160,7 @@ public class Controlador {
         Vista.mostrarMissatge("Jugador transferit");
     }
 
-    private void actualitzarDades() throws Exception {
-        String fitxerPartit = Vista.demanarText("Introdueix el nom del fitxer amb les dades del partit: ");
 
-        BufferedReader lector = new BufferedReader(new FileReader(fitxerPartit));
-        String linea;
-
-        List<Stats> stats = new ArrayList<>();
-        lector.readLine();
-
-        while ((linea = lector.readLine()) != null) {
-            String[] fields = linea.split(",");
-            int playerId = Integer.parseInt(fields[0]);
-            int gameId = Integer.parseInt(fields[1]);
-            int teamId = Integer.parseInt(fields[2]);
-            int pts = Integer.parseInt(fields[3]);
-
-            Stats stat = new Stats(playerId,gameId,teamId,pts);
-            stats.add(stat);
-        }
-
-        jugadorsDAO.updatePlayerStats(stats);
-    }
 
     private void modificarEstadistiquesJugador() throws Exception {
         String nomJugador = Vista.demanarText("Introdueix un jugador per modificar les seves estadístiques: ");

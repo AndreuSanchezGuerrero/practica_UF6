@@ -12,12 +12,12 @@ public class Vista {
         System.out.println("1) Llistar tots els jugadors d'un equip");
         System.out.println("2) Calcular la mitjana de punts, rebots, assistències, etc. d'un jugador");
         System.out.println("3) Llistar tots els partits jugats per un equip amb el seu resultat");
-        System.out.println("4) Afegir un nou jugador a un equip");
+        System.out.println("4) Afegir un nou jugador a un equip--MANTENIMENT");
         System.out.println("5) Traspassar un jugador a un altre equip");
-        System.out.println("6) Actualitzar les dades de jugadors o equips després d'un partit");
-        System.out.println("7) Modificar les estadístiques d'un jugador");
-        System.out.println("8) Retirar (Eliminar) un jugador");
-        System.out.println("9) Canviar el nom de la franquícia d’un equip");
+        System.out.println("6) Actualitzar les dades de jugadors o equips després d'un partit --MANTENIMENT");
+        System.out.println("7) Modificar les estadístiques d'un jugador--MANTENIMENT");
+        System.out.println("8) Retirar (Eliminar) un jugador--MANTENIMENT");
+        System.out.println("9) Canviar el nom de la franquícia d’un equip--MANTENIMENT");
         System.out.println("0) Sortir");
     }
 

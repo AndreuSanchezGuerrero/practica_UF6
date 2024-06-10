@@ -118,3 +118,5 @@ Cada funció d'inserció de dades segueix el mateix format:
   3. Fa una pausa amb `sleep(1)`.
   4. Imprimeix un missatge indicant que totes les dades han estat inserides.
   5. Fa una pausa amb `sleep(1)`.
+
+  
